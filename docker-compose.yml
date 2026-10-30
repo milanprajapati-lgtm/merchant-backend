@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: merchant-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: merchant
+      POSTGRES_PASSWORD: merchant_local_password
+      POSTGRES_DB: merchant_backend
+    ports:
+      - "127.0.0.1:5432:5432" # loopback only: this is a dev database with a local password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U merchant -d merchant_backend"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    container_name: merchant-redis
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:6379:6379" # loopback only: Redis here has no password
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+volumes:
+  postgres_data:
